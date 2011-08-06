@@ -26,7 +26,7 @@ for root,dirs,files in os.walk(os.getcwd()):
     oldlen = len(cppfiles)
     cppfiles += filter(lambda x:retest.search(x)<>None,files)        #过滤非C/C++文件
     for index in range(oldlen,len(cppfiles)):
-        cppfiles[index] = root + '/' + cppfiles[index];
+        cppfiles[index] = root + '/' + cppfiles[index]
 
 oldstdout = sys.stdout
 sys.stdout= logfile = open('maketags.log','w')
@@ -66,4 +66,7 @@ print 'total cpp and include files:'+str(len(cppfiles))
 sys.stdout = oldstdout
 logfile.close()
 
-os.system('ctags --c++-kinds=+p --fields=+iaS --extra=+q -L python_tags_filelist')
+# os.system('ctags --c++-kinds=+p --fields=+iaS --extra=+q -L python_tags_filelist')
+
+os.system('/usr/local/Cellar/ctags/5.8/bin/ctags --c++-kinds=+p --fields=+iaS --extra=+q -L python_tags_filelist')
+

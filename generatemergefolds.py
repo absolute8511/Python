@@ -76,19 +76,33 @@ def deldup(srcfile,destfile):
     return linesnodup            
 # 从svn导出指定版本的文件,filelist为要导出的svn文件路径列表,svnbasepath为服务器的svn url,localpath为本地导出根目录
 # Revision为要导出的版本, samefold指示是否将导出文件放在同一路径下,还是重建和svn一样的本地目录树
-def copyfilesfromsvn(filelist,svnbasepath,localpath,revision,samefold=True):
+def copyfilesfromsvn(filelist,svnbasepath,localpath,revision,samefold=False):
     shutil.rmtree(localpath,True)
     if not path.lexists(localpath):
         os.makedirs(localpath)
     os.chdir(localpath)
+    prefix = r'/IMClient-RV/'
+    prefix2 = r'/revolution_min/'
+    prefix3 = r'/Private/'
     haserr = False
     for onefile in filelist:
+        pos = onefile.find(prefix)
+        if pos==-1:
+            pos = onefile.find(prefix2)
+            if pos == -1:
+                pos = onefile.find(prefix3)
+                if pos == -1:
+                    continue
         if samefold:
-            cmdstr = 'svn export -r '+ str(revision) + ' ' + svnbasepath + onefile
+            localfilepath = localpath + path.basename(onefile)
+            if path.lexists(localfilepath):
+                localfilepath = localfilepath + '-dup'
+            cmdstr = 'svn export --force -r '+ str(revision) + ' ' + svnbasepath + onefile + ' ' + localfilepath
         else:
-            if not path.lexists(path.dirname(localpath+onefile)):
-                os.makedirs(path.dirname(localpath+onefile))
-            cmdstr = 'svn export -r '+ str(revision) + ' ' + svnbasepath + onefile + ' ' + localpath + onefile
+            localfilepath = localpath + onefile.replace(onefile[:pos], '', 1)
+            if not path.lexists(path.dirname(localfilepath)):
+                os.makedirs(path.dirname(localfilepath))
+            cmdstr = 'svn export --force -r '+ str(revision) + ' ' + svnbasepath + onefile + ' ' + localfilepath
         try:
             retcode = subprocess.call(cmdstr,shell=True)
             if retcode != 0:
@@ -98,21 +112,39 @@ def copyfilesfromsvn(filelist,svnbasepath,localpath,revision,samefold=True):
     return haserr
 # filelist为本地源码库的全路径,localsrcpath为本地源代码库的根路径,localdestpath为要拷贝到的目标根路径,
 # samefold表示是否要在目标路径创建和源路径对应的目录树,还是仅拷贝文件到根路径
-def copyfilesfromlocal(filelist,localsrcpath,localdestpath,samefold=True):
+def copyfilesfromlocal(filelist,localsrcpath,localdestpath,samefold=False):
     shutil.rmtree(localdestpath,True)
     if not path.lexists(localdestpath):
         os.makedirs(localdestpath)
     os.chdir(localdestpath)
-    prefix = '/IMClient/trunk_tb_trader'
+    prefix = r'/IMClient-RV/'
+    prefix2 = r'/revolution_min/'
+    prefix3 = r'/Private/'
+    #prefix4 = '/modules/'
+    #prefix = '/IMClient/Branches_tb/20110325_Base6.6002C_security'
+    #prefix2 = '/IMClient/Branches_tb/20110420_Base6.6003C_security2'
     for onefile in filelist:
-        onefile = onefile.replace(prefix,'',1)
-        if samefold:
-            shutil.copy2(localsrcpath+onefile,localdestpath)
-        else:
-            destdir = path.dirname(localdestpath+onefile)
-            if not path.lexists(destdir):
-                os.makedirs(destdir)
-            shutil.copy2(localsrcpath+onefile,localdestpath+onefile)
+        pos = onefile.find(prefix)
+        if pos==-1:
+            pos = onefile.find(prefix2)
+            if pos == -1:
+                pos = onefile.find(prefix3)
+                if pos == -1:
+                    continue
+        localfilepath = onefile.replace(onefile[:pos],'',1)
+        try:
+            if samefold:
+                copydest = localdestpath + path.basename(localfilepath)
+                if path.lexists(copydest):
+                    copydest = copydest + '-dup'
+                shutil.copy2(localsrcpath+localfilepath,copydest)
+            else:
+                copydest = localdestpath+localfilepath
+                if not path.lexists(path.dirname(copydest)):
+                    os.makedirs(path.dirname(copydest))
+                shutil.copy2(localsrcpath+localfilepath,copydest)
+        except IOError,e:
+            pass
 
 def generatemergefolds(svnlogfile,svnbasepath,localexportpath,localsrcpath):
         nodupfile = svnlogfile + '.nodup'
@@ -148,12 +180,12 @@ if __name__ == "__main__":
         tmp = tmp.strip()
         if tmp != '':
             svnbasepath = tmp
-        localpath = r'D:/test/PYOutput'
+        localpath = r'F:/PYOutput'
         tmp = raw_input('input localexportpath:(default-'+localpath+')')
         tmp = tmp.strip()
         if tmp != '':
             localpath = tmp
-        localsrcpath = r'D:/trunk_tb_trader'
+        localsrcpath = r'F:/2011_beta2'
         tmp = raw_input('input localsrcpath:(default-'+localsrcpath+')')
         tmp = tmp.strip()
         if tmp != '':

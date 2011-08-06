@@ -40,7 +40,7 @@ def vimDirDiffN(diffdirs):
     fp = open(diffbuffer,'w')
     fp.write(write2fileline)
     fp.close()
-    subprocess.Popen('gvim -c ":DirDiffN ' + path.join(os.getcwd(),diffbuffer) + '"',shell=True)
+    subprocess.Popen('gvim -D -c ":DirDiffN ' + path.join(os.getcwd(),diffbuffer) + '"',shell=True)
 
 if __name__ == "__main__":
     if len(sys.argv) > 2:
@@ -52,9 +52,10 @@ if __name__ == "__main__":
         print "Interactive Mode."
         diffdirs = raw_input('input the dirs you want to diff(in List["A","B"]): ')
         if diffdirs == '':
-            diffdirs = ['d:/test/PYOutput/old','d:/test/PYOutput/new','d:/test/PYOutput/third_merge']
+            diffdirs = ['f:/PYOutput/old','f:/PYOutput/new','f:/PYOutput/third_merge']
         else:
             diffdirs = eval(diffdirs)
         for index in range(0,len(diffdirs)):
             diffdirs[index] = path.realpath(diffdirs[index])
         vimDirDiffN(diffdirs)
+        raw_input('press to exit.')
