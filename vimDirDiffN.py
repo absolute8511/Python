@@ -40,7 +40,7 @@ def vimDirDiffN(diffdirs):
     fp = open(diffbuffer,'w')
     fp.write(write2fileline)
     fp.close()
-    subprocess.Popen('gvim -D -c ":DirDiffN ' + path.join(os.getcwd(),diffbuffer) + '"',shell=True)
+    subprocess.Popen('mvim -c ":DirDiffN ' + path.join(os.getcwd(),diffbuffer) + '"',shell=True)
 
 if __name__ == "__main__":
     if len(sys.argv) > 2:
